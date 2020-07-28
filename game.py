@@ -22,6 +22,14 @@ class game:
         if strategy:
             self.strategy = self._normalize_strategy(strategy)
 
+    def __repr__(self):
+        return str(self.game_matrix)
+
+    def __str__(self):
+        # if self.rows == 0 or self.cols == 0:
+        #    return 'Matrix(%s, %s, [])' % (self.rows, self.cols)
+        return "Game(%s)" % str(self.game_matrix)
+
     def _normalize_strategy(self, strategy):
         empty_s = [0] * len(strategy)
         for s in range(len(strategy)):
@@ -79,6 +87,61 @@ class game:
         res = res.args[0]
         return {str(set[i]): res[i] for i in range(len(set))}
 
+    # todo complete
+    def mixed_values_inequalities(self):
+        A = sym.Matrix(self.game_matrix)
+        # set = sym.symbols('x1:%d' % A.rows)
+
+    def drop_dominated(self=None, game_matrix=None, inplace=False):
+        if self:
+            game_matrix = self.game_matrix
+        A_matrix = game_matrix
+        while A_matrix:
+            A_matrix = game.drop_dominated_rows(game_matrix=A_matrix)
+            A_matrix = game.drop_dominated_columns(game_matrix=A_matrix)
+            if game_matrix == A_matrix:
+                break
+            game_matrix = A_matrix
+        return game_matrix
+
+    @staticmethod
+    def _drop_comp(game_matrix, comp, inplace=False, ):
+        A = []
+        if comp == "<":
+            comp = lambda x1, x2: x1 < x2
+        elif comp == ">":
+            comp = lambda x1, x2: x1 > x2
+        elif comp == "=":
+            comp = lambda x1, x2: x1 == x2
+
+        for i1 in range(len(game_matrix)):
+            is_candidate = True
+            for i2 in [i2 for i2 in range(len(game_matrix)) if i2 != i1]:
+                if all([comp(x1, x2) for x1, x2 in (zip(game_matrix[i1], game_matrix[i2]))]):
+                    is_candidate = False
+                    break
+            if is_candidate:
+                A.append(game_matrix[i1])
+        return A
+
+    def drop_dominated_rows(self=None, game_matrix=None, inplace=False):
+        if self:
+            game_matrix = self.game_matrix
+        game_matrix = game._drop_comp(game_matrix, "<")
+        if inplace:
+            self.game_matrix = game_matrix
+            return self
+        return game_matrix
+
+    def drop_dominated_columns(self=None, game_matrix=None, inplace=False):
+        if self:
+            game_matrix = self.game_matrix
+        game_matrix = np.transpose(game._drop_comp(np.transpose(game_matrix).tolist(), ">")).tolist()
+        if inplace:
+            self.game_matrix = game_matrix
+            return self
+        return game_matrix
+
     def detail(self):
         return str(self.values()) + "\n" + str(self.mixed_values())
 
@@ -92,13 +155,17 @@ class game:
 # p 27
 M1 = [[-2, 2, -1], [1, 1, 1], [3, 0, 1]]
 M2 = [[3, -1], [-1, 9]]
-M3 = [[1, 1], [1, 1]]
-g = game(M1)
+M3 = [[0, 2, 2], [1, 2, 2], [2, 3, 3], [-1, 4, 4], [-2, 5, 5], [2, 6, 6], [-10, 7, 7]]
+M4 = [[10, 0, 7, 4], [2, 6, 4, 7], [5, 2, 3, 8]]
+g = game(M4)
+print(g.drop_dominated())
 
-print( \
-    g.game_matrix,"\n",
-    g.values(), "\n",
-    "saddle_points:", "\n",
-    g.saddle_points(), "\n",
-    g.mixed_values()
-)
+# print( \
+#     g.game_matrix, "\n",
+#     g.values(), "\n",
+#     "saddle_points:", "\n",
+#     g.saddle_points(), "\n",
+#     g.mixed_values(), "\n",
+#     "inneq:", "\n",
+#     g.mixed_values_inequalities(), "\n",
+# )
