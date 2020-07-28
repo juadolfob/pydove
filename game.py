@@ -2,14 +2,16 @@ import itertools
 import numpy as np
 import sympy as sym
 
+import util
+
 
 def _validate_game_matrix(game_matrix):
     is_mxn = all(len(row) == len(game_matrix[0]) for row in game_matrix)
     return is_mxn
 
 
-def _validate_strategy(len, strategy):
-    has_regular_Iterables = all(len(row) == len(strategy[0]) for row in strategy)
+def _validate_strategy(strategy_len, strategy):
+    has_regular_Iterables = all(strategy_len(row) == strategy_len(strategy[0]) for row in strategy)
     return has_regular_Iterables
 
 
@@ -102,22 +104,18 @@ class game:
             if game_matrix == A_matrix:
                 break
             game_matrix = A_matrix
-        return game_matrix
+        if inplace:
+            self.game_matrix = game_matrix
+        return self
 
     @staticmethod
-    def _drop_comp(game_matrix, comp, inplace=False, ):
+    def _drop_comp(game_matrix, sign):
         A = []
-        if comp == "<":
-            comp = lambda x1, x2: x1 < x2
-        elif comp == ">":
-            comp = lambda x1, x2: x1 > x2
-        elif comp == "=":
-            comp = lambda x1, x2: x1 == x2
 
         for i1 in range(len(game_matrix)):
             is_candidate = True
             for i2 in [i2 for i2 in range(len(game_matrix)) if i2 != i1]:
-                if all([comp(x1, x2) for x1, x2 in (zip(game_matrix[i1], game_matrix[i2]))]):
+                if all([util.comp2(x1, x2, sign) for x1, x2 in (zip(game_matrix[i1], game_matrix[i2]))]):
                     is_candidate = False
                     break
             if is_candidate:
@@ -158,14 +156,13 @@ M2 = [[3, -1], [-1, 9]]
 M3 = [[0, 2, 2], [1, 2, 2], [2, 3, 3], [-1, 4, 4], [-2, 5, 5], [2, 6, 6], [-10, 7, 7]]
 M4 = [[10, 0, 7, 4], [2, 6, 4, 7], [5, 2, 3, 8]]
 g = game(M4)
-print(g.drop_dominated())
-
-# print( \
-#     g.game_matrix, "\n",
-#     g.values(), "\n",
-#     "saddle_points:", "\n",
-#     g.saddle_points(), "\n",
-#     g.mixed_values(), "\n",
-#     "inneq:", "\n",
-#     g.mixed_values_inequalities(), "\n",
-# )
+g.drop_dominated(inplace=True)
+print(g)
+print( \
+    g.game_matrix, "\n",
+    g.values(), "\n",
+    "saddle_points:", "\n",
+    g.saddle_points(), "\n",
+    g.mixed_values(), "\n",
+    "inneq:", "\n",
+)
