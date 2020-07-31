@@ -1,8 +1,8 @@
 import itertools
-import numpy as np
-import sympy as sym
 
-import util
+import sympy as sym
+import numpy as np
+from pydove.util import *
 
 
 def _validate_game_matrix(game_matrix):
@@ -10,46 +10,20 @@ def _validate_game_matrix(game_matrix):
     return is_mxn
 
 
-def _validate_strategy(strategy_len, strategy):
-    has_regular_Iterables = all(strategy_len(row) == strategy_len(strategy[0]) for row in strategy)
-    return has_regular_Iterables
+class GameMatrix:
 
-
-class game:
-
-    def __init__(self, game_matrix, strategy=None):
-        # not necessary maybe
+    def __init__(self, game_matrix):
+        # replace with sym.Matrix validation
         if _validate_game_matrix(game_matrix):
             self.game_matrix = game_matrix
-        if strategy:
-            self.strategy = self._normalize_strategy(strategy)
 
     def __repr__(self):
         return str(self.game_matrix)
 
     def __str__(self):
         # if self.rows == 0 or self.cols == 0:
-        #    return 'Matrix(%s, %s, [])' % (self.rows, self.cols)
-        return "Game(%s)" % str(self.game_matrix)
-
-    def _normalize_strategy(self, strategy):
-        empty_s = [0] * len(strategy)
-        for s in range(len(strategy)):
-            if isinstance(s, int):
-                int_s = strategy[s]
-                strategy[s] = empty_s[:]
-                strategy[s][int_s] = 1
-            elif isinstance(s, list):
-                if not len(s) == len(strategy[s]):
-                    raise Exception("")
-                if not self.has_mixed_strategies:
-                    self.has_mixed_strategies = True
-
-    def dominated_strategy(self):
-        pass
-
-    def game_type(self):
-        pass
+        #    return 'GameMatrix(%s, %s, [])' % str(self._game_matrix)
+        return "GameMatrix(%s)" % str(self.game_matrix)
 
     def values(self):
         vu = max([min(row) for row in self.game_matrix])
@@ -92,15 +66,15 @@ class game:
     # todo complete
     def mixed_values_inequalities(self):
         A = sym.Matrix(self.game_matrix)
-        # set = sym.symbols('x1:%d' % A.rows)
+        print(A)
 
     def drop_dominated(self=None, game_matrix=None, inplace=False):
         if self:
             game_matrix = self.game_matrix
         A_matrix = game_matrix
         while A_matrix:
-            A_matrix = game.drop_dominated_rows(game_matrix=A_matrix)
-            A_matrix = game.drop_dominated_columns(game_matrix=A_matrix)
+            A_matrix = GameMatrix.drop_dominated_rows(game_matrix=A_matrix)
+            A_matrix = GameMatrix.drop_dominated_columns(game_matrix=A_matrix)
             if game_matrix == A_matrix:
                 break
             game_matrix = A_matrix
@@ -109,13 +83,13 @@ class game:
         return self
 
     @staticmethod
-    def _drop_comp(game_matrix, sign):
+    def _drop_on_innequality(game_matrix, sign):
         A = []
 
         for i1 in range(len(game_matrix)):
             is_candidate = True
             for i2 in [i2 for i2 in range(len(game_matrix)) if i2 != i1]:
-                if all([util.comp2(x1, x2, sign) for x1, x2 in (zip(game_matrix[i1], game_matrix[i2]))]):
+                if all([comp2(x1, x2, sign) for x1, x2 in (zip(game_matrix[i1], game_matrix[i2]))]):
                     is_candidate = False
                     break
             if is_candidate:
@@ -125,7 +99,7 @@ class game:
     def drop_dominated_rows(self=None, game_matrix=None, inplace=False):
         if self:
             game_matrix = self.game_matrix
-        game_matrix = game._drop_comp(game_matrix, "<")
+        game_matrix = GameMatrix._drop_on_innequality(game_matrix, "<")
         if inplace:
             self.game_matrix = game_matrix
             return self
@@ -134,7 +108,7 @@ class game:
     def drop_dominated_columns(self=None, game_matrix=None, inplace=False):
         if self:
             game_matrix = self.game_matrix
-        game_matrix = np.transpose(game._drop_comp(np.transpose(game_matrix).tolist(), ">")).tolist()
+        game_matrix = np.transpose(GameMatrix._drop_on_innequality(np.transpose(game_matrix).tolist(), ">")).tolist()
         if inplace:
             self.game_matrix = game_matrix
             return self
@@ -148,21 +122,3 @@ class game:
 
     def best_response(self):
         pass
-
-
-# p 27
-M1 = [[-2, 2, -1], [1, 1, 1], [3, 0, 1]]
-M2 = [[3, -1], [-1, 9]]
-M3 = [[0, 2, 2], [1, 2, 2], [2, 3, 3], [-1, 4, 4], [-2, 5, 5], [2, 6, 6], [-10, 7, 7]]
-M4 = [[10, 0, 7, 4], [2, 6, 4, 7], [5, 2, 3, 8]]
-g = game(M4)
-g.drop_dominated(inplace=True)
-print(g)
-print( \
-    g.game_matrix, "\n",
-    g.values(), "\n",
-    "saddle_points:", "\n",
-    g.saddle_points(), "\n",
-    g.mixed_values(), "\n",
-    "inneq:", "\n",
-)
