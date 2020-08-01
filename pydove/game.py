@@ -8,12 +8,11 @@ def _validate_strategy(strategy_len, strategy):
 
 
 class Game(GameMatrix):
+    """
 
+    """
     def __init__(self, game_matrix, strategy=None):
         GameMatrix.__init__(self, game_matrix)
-        # not necessary maybe
-        print(self.game_matrix)
-
         if strategy:
             self.strategy = self._normalize_strategy(strategy)
 

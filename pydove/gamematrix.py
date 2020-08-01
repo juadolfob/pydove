@@ -1,7 +1,7 @@
 import itertools
 
 import sympy as sym
-import numpy as np
+from numpy import array
 from pydove.util import *
 
 
@@ -11,11 +11,18 @@ def _validate_game_matrix(game_matrix):
 
 
 class GameMatrix:
+    """
+    Game matrix
+
+
+    """
 
     def __init__(self, game_matrix):
         # replace with sym.Matrix validation
-        if _validate_game_matrix(game_matrix):
-            self.game_matrix = game_matrix
+        self.game_matrix = array(game_matrix)
+        self.rows, self.cols = self.game_matrix.shape
+        if self.rows == self.cols:
+            pass
 
     def __repr__(self):
         return str(self.game_matrix)
@@ -52,21 +59,61 @@ class GameMatrix:
 
     # todo delete redundant (repeated) pure strategies
     # todo return strategies for all players
-    def mixed_values(self):
-        A = sym.Matrix(self.game_matrix)
-        set = sym.symbols('x1:%d v' % (A.rows + 1))
-        e = sym.Matrix([([1] * A.cols) + [0]])
-        b = sym.Matrix(([0] * A.rows) + [1])
+    @staticmethod
+    def zero_fill_square(arr):
+        """
 
-        M = (A.row_join(sym.Matrix([-1] * A.cols))).col_join(e)
-        res = sym.linsolve((M, b), set)
+        :param arr:
+        :return:
+        """
+        rows, cols = arr.shape
+        b = np.zeros((cols, cols),object)
+        if rows >= cols:
+            b[:, :cols - rows] = arr
+            return b
+        b[:rows - cols, :] = arr
+        return b
+
+    def mixed_values(self):
+        """
+
+        :return:
+        """
+
+        var_set = sym.symbols('x1:%d v' % (self.cols + 1))
+        var_row = array([([1] * self.cols) + [0]])
+        v_column = array([[-1]] * self.rows)
+
+        B_side = array(([[0]] * self.rows) + [[1]])
+        M = np.append(self.game_matrix, v_column, axis=1)
+        M = np.append(M, var_row, axis=0)
+        B_side = Matrix(B_side)
+
+        print(M)
+
+        M = np.append(M, B_side, axis=1)
+        if self.rows != self.cols:
+            m_row, m_col = M.shape
+            #todo fix this
+            if m_row > m_col:
+                for i in range(m_row - m_col+1):
+                    print("NOT LIKE THIS")
+                    M = np.append(M, [M[-1]], axis=0)
+            else:
+                for i in range(m_col-m_row-1):
+                    print(M[-1])
+                    M = np.append(M, [M[-1]], axis=0)
+
+        print(M)
+
+        print(B_side, "\n", M)
+        res = sym.linsolve(Matrix(M), var_set)
         res = res.args[0]
-        return {str(set[i]): res[i] for i in range(len(set))}
+        return {str(var_set[i]): res[i] for i in range(len(var_set))}
 
     # todo complete
     def mixed_values_inequalities(self):
-        A = sym.Matrix(self.game_matrix)
-        print(A)
+        pass
 
     def drop_dominated(self=None, game_matrix=None, inplace=False):
         if self:
