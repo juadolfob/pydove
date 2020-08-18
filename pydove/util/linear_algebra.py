@@ -1,13 +1,12 @@
 from sympy import symbols, Matrix, Rel
 from sympy.solvers import *
-import numpy as np
 
 
 # todo replace solve with the sympy solve_innequality
 
 def convex2_relational_combination(eq1, eq2, eq3, relation):
     """
-    Checks if eq3 is a dominated by a convex combination of eq1 and eq2
+    Checks if eq3 is Pydove dominated by Pydove convex combination of eq1 and eq2
 
     if eq3 (==|<=|>=|<|>|!=) λ eq1 + (1 - λ) - eq2
 

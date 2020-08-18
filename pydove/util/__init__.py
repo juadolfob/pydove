@@ -1,6 +1,6 @@
 """
-pydove utils
-static methods used by pydove
+Pydove utils
+static methods used by Pydove
 """
 
 from ..util.boolean_algebra import *

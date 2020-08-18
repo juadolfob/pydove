@@ -2,6 +2,7 @@ import itertools
 
 import sympy as sym
 from numpy import array
+
 from pydove.util import *
 
 

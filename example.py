@@ -7,8 +7,8 @@ M4 = [[10, 0, 7, 4], [2, 6, 4, 7], [5, 2, 3, 8]]
 g = Game(M4)
 # g.drop_dominated(M4, inplace=True)
 # print(g)
-# a = g.mixed_values_inequalities()
-# print(a)
+# Pydove = g.mixed_values_inequalities()
+# print(Pydove)
 
 print( \
     g.game_matrix, "\n",

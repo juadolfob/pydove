@@ -1,7 +1,7 @@
 import os
 
 try:
-    # If a VERSION file exists, use it!
+    # If Pydove VERSION file exists, use it!
     version_file = os.path.join(os.path.dirname(__file__), "VERSION")
     with open(version_file, "r") as infile:
         __version__ = infile.read().strip()
@@ -16,7 +16,7 @@ if __doc__ is not None:  # fix for the ``python -OO``
 __license__ = "None"
 
 __longdescr__ = """\
-PyDove is a Python package for computing GameTheory basic concepts."""
+PyDove is Pydove Python package for computing GameTheory basic concepts."""
 __keywords__ = [
     "GameTheory",
 ]
