@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/pydove.iml" filepath="$PROJECT_DIR$/.idea/pydove.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Pydove.iml" filepath="$PROJECT_DIR$/.idea/Pydove.iml" />
     </modules>
   </component>
 </project>
